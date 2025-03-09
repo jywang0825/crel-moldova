@@ -6,8 +6,18 @@ from sklearn.decomposition import PCA
 # Load the dataset from the Excel file
 df = pd.read_excel("/Users/joseph/Downloads/quarterly_trends_averages.xlsx")
 
-# Select only numeric columns for PCA (if your dataset has non-numeric columns)
-numeric_df = df.select_dtypes(include=[np.number])
+# If a 'Date' column exists, convert it to datetime and store it separately
+if 'Date' in df.columns:
+    df['Date'] = pd.to_datetime(df['Date'])
+    date_data = df['Date']
+    # Remove the date column from the DataFrame used for PCA
+    df_numeric = df.drop(columns=['Date'])
+else:
+    date_data = None
+    df_numeric = df.copy()
+
+# Select only numeric columns for PCA (ensuring date is excluded)
+numeric_df = df_numeric.select_dtypes(include=[np.number])
 print("\nNumeric data used for PCA:")
 print(numeric_df.head())
 
@@ -108,6 +118,18 @@ if numeric_df.shape[1] >= 2:
     plt.show()
 else:
     print("Not enough numeric features to display a before vs. after plot.")
+
+# If date information is available, let's plot PC1 over time for trend analysis
+if date_data is not None:
+    # Create a DataFrame with PCA-transformed data and set date as the index
+    pca_df = pd.DataFrame(X_pca, index=date_data)
+    plt.figure(figsize=(10, 6))
+    plt.plot(pca_df.index, pca_df.iloc[:, 0], marker='o')
+    plt.xlabel("Date")
+    plt.ylabel("Principal Component 1")
+    plt.title("Trend of Principal Component 1 Over Time")
+    plt.grid(True)
+    plt.show()
 
 print("Full DataFrame shape:", df.shape)
 print("Numeric DataFrame shape:", numeric_df.shape)
