@@ -6,34 +6,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import r2_score, mean_squared_error
 
 def run_pca(file_path, target_col_index=0, date_column_name='date'):
-    """
-    Runs PCA on the dataset in file_path while:
-      - Skipping the second row (blank row)
-      - Handling numbers with commas in them using the thousands parameter
-      - Converting applicable columns to numeric to catch errors
-      - Reporting any columns with missing (NaN) values
-    
-    Parameters:
-        file_path (str): Full path to the CSV file.
-        target_col_index (int): The index (after dropping the date column) to compare predicted vs. actual values.
-        date_column_name (str): Name of the date column to drop (case insensitive).
-        
-    Returns:
-        dict: A dictionary with the explained variance ratios, component loadings, R^2, MSE, and the PCA object.
-    """
     # --- Load Data ---
-    # Skip the second row (row with index 1) since it is a blank row.
-    # Use the thousands parameter to properly parse numbers with commas.
+
     df = pd.read_csv(file_path, skiprows=[1], thousands=',')
     
     # --- Drop Date Column ---
-    # Identify and drop the date column (case insensitive)
     date_cols = [col for col in df.columns if col.lower() == date_column_name.lower()]
     if date_cols:
         df = df.drop(columns=date_cols)
     
     # --- Convert All Columns to Numeric ---
-    # This conversion will force any improper string entries to become NaN.
     for col in df.columns:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     
